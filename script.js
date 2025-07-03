@@ -91,27 +91,24 @@ class SmoothScrolling {
 class MobileMenu {
   constructor() {
     this.hamburger = document.querySelector('.hamburger');
-    this.mobileMenu = document.querySelector('.mobile-menu');
-    this.closeBtn = document.querySelector('.mobile-menu__close');
-    this.menuLinks = document.querySelectorAll('.mobile-menu__link');
+    this.mobileMenu = null;
+    this.menuLinks = [];
     this.body = document.body;
     
     this.init();
   }
 
   init() {
-    if (!this.hamburger || !this.mobileMenu) return;
+    if (!this.hamburger) return;
 
     // Create mobile menu if it doesn't exist
     this.createMobileMenu();
     
     // Hamburger click event
-    this.hamburger.addEventListener('click', () => this.toggleMenu());
-    
-    // Close button click event
-    if (this.closeBtn) {
-      this.closeBtn.addEventListener('click', () => this.closeMenu());
-    }
+    this.hamburger.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.toggleMenu();
+    });
     
     // Menu link click events
     this.menuLinks.forEach(link => {
@@ -120,17 +117,19 @@ class MobileMenu {
     
     // Close menu on escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.mobileMenu.classList.contains('active')) {
+      if (e.key === 'Escape' && this.mobileMenu && this.mobileMenu.classList.contains('active')) {
         this.closeMenu();
       }
     });
     
     // Close menu on outside click
-    this.mobileMenu.addEventListener('click', (e) => {
-      if (e.target === this.mobileMenu) {
-        this.closeMenu();
-      }
-    });
+    if (this.mobileMenu) {
+      this.mobileMenu.addEventListener('click', (e) => {
+        if (e.target === this.mobileMenu) {
+          this.closeMenu();
+        }
+      });
+    }
   }
 
   createMobileMenu() {
@@ -151,10 +150,29 @@ class MobileMenu {
       // Re-query elements
       this.mobileMenu = document.querySelector('.mobile-menu');
       this.menuLinks = document.querySelectorAll('.mobile-menu__link');
+      
+      // Add event listeners to the newly created menu links
+      this.menuLinks.forEach(link => {
+        link.addEventListener('click', () => this.closeMenu());
+      });
+      
+      // Add close on outside click
+      this.mobileMenu.addEventListener('click', (e) => {
+        if (e.target === this.mobileMenu) {
+          this.closeMenu();
+        }
+      });
+      
+      console.log('Mobile menu created with', this.menuLinks.length, 'links');
     }
   }
 
   toggleMenu() {
+    if (!this.mobileMenu) {
+      console.error('Mobile menu not found');
+      return;
+    }
+    
     if (this.mobileMenu.classList.contains('active')) {
       this.closeMenu();
     } else {
@@ -163,21 +181,23 @@ class MobileMenu {
   }
 
   openMenu() {
+    if (!this.mobileMenu) return;
+    
     this.mobileMenu.classList.add('active');
     this.hamburger.classList.add('active');
     this.body.style.overflow = 'hidden';
     
-    // Focus management for accessibility
-    this.closeBtn?.focus();
+    console.log('Mobile menu opened');
   }
 
   closeMenu() {
+    if (!this.mobileMenu) return;
+    
     this.mobileMenu.classList.remove('active');
     this.hamburger.classList.remove('active');
     this.body.style.overflow = '';
     
-    // Return focus to hamburger button
-    this.hamburger.focus();
+    console.log('Mobile menu closed');
   }
 }
 
