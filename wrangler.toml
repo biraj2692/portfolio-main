@@ -1,0 +1,58 @@
+name = "portfolio"
+compatibility_date = "2025-07-03"
+
+[assets]
+directory = "."
+include = ["*.html", "*.css", "*.js", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.ico", "*.webp", "*.woff", "*.woff2", "*.ttf", "*.otf"]
+exclude = ["node_modules/**", "*.map", "package*.json", "*.md", "wrangler.toml", "*.scss", "bun.lockb"]
+
+# Optional: Set up custom headers for better performance
+[[headers]]
+for = "*.css"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.js"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.png"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.jpg"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.jpeg"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.gif"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.svg"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.woff"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.woff2"
+[headers.values]
+"Cache-Control" = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.html"
+[headers.values]
+"Cache-Control" = "public, max-age=300"

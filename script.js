@@ -139,7 +139,6 @@ class MobileMenu {
       const navLinks = document.querySelectorAll('.portfolio-nav a');
       const mobileMenuHTML = `
         <div class="mobile-menu">
-          <button class="mobile-menu__close" aria-label="Close menu">&times;</button>
           <nav class="mobile-menu__nav">
             ${Array.from(navLinks).map(link => 
               `<a href="${link.href}" class="mobile-menu__link">${link.textContent}</a>`
@@ -151,7 +150,6 @@ class MobileMenu {
       
       // Re-query elements
       this.mobileMenu = document.querySelector('.mobile-menu');
-      this.closeBtn = document.querySelector('.mobile-menu__close');
       this.menuLinks = document.querySelectorAll('.mobile-menu__link');
     }
   }

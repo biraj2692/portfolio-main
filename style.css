@@ -1024,9 +1024,10 @@ html, body {
 
 @media (max-width: 767px) {
   .projects__card {
-    min-width: 320px;
-    max-width: 320px;
-    height: 420px;
+    min-width: 300px;
+    max-width: 300px;
+    height: auto;
+    min-height: 350px;
   }
 }
 
