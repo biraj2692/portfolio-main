@@ -4,6 +4,57 @@
  */
 
 // ===================================
+// POLYFILLS FOR BROWSER COMPATIBILITY
+// ===================================
+
+// Intersection Observer polyfill check
+if (!('IntersectionObserver' in window)) {
+  // Fallback for browsers without Intersection Observer
+  window.IntersectionObserver = class {
+    constructor(callback, options = {}) {
+      this.callback = callback;
+      this.options = options;
+      this.elements = new Set();
+    }
+
+    observe(element) {
+      this.elements.add(element);
+      // Immediate trigger for fallback
+      this.callback([{
+        target: element,
+        isIntersecting: true
+      }]);
+    }
+
+    unobserve(element) {
+      this.elements.delete(element);
+    }
+
+    disconnect() {
+      this.elements.clear();
+    }
+  };
+}
+
+// Element.closest() polyfill for IE
+if (!Element.prototype.closest) {
+  Element.prototype.closest = function(s) {
+    var el = this;
+    do {
+      if (Element.prototype.matches.call(el, s)) return el;
+      el = el.parentElement || el.parentNode;
+    } while (el !== null && el.nodeType === 1);
+    return null;
+  };
+}
+
+// Element.matches() polyfill for IE
+if (!Element.prototype.matches) {
+  Element.prototype.matches = Element.prototype.msMatchesSelector ||
+                              Element.prototype.webkitMatchesSelector;
+}
+
+// ===================================
 // UTILITY FUNCTIONS
 // ===================================
 
@@ -163,7 +214,7 @@ class MobileMenu {
         }
       });
       
-      console.log('Mobile menu created with', this.menuLinks.length, 'links');
+
     }
   }
 
@@ -182,22 +233,29 @@ class MobileMenu {
 
   openMenu() {
     if (!this.mobileMenu) return;
-    
+
     this.mobileMenu.classList.add('active');
     this.hamburger.classList.add('active');
+    this.hamburger.setAttribute('aria-expanded', 'true');
     this.body.style.overflow = 'hidden';
-    
-    console.log('Mobile menu opened');
+
+    // Focus first menu item for keyboard navigation
+    const firstMenuItem = this.mobileMenu.querySelector('a');
+    if (firstMenuItem) {
+      firstMenuItem.focus();
+    }
   }
 
   closeMenu() {
     if (!this.mobileMenu) return;
-    
+
     this.mobileMenu.classList.remove('active');
     this.hamburger.classList.remove('active');
+    this.hamburger.setAttribute('aria-expanded', 'false');
     this.body.style.overflow = '';
-    
-    console.log('Mobile menu closed');
+
+    // Return focus to hamburger button
+    this.hamburger.focus();
   }
 }
 
@@ -374,6 +432,7 @@ class FormValidator {
 class ScrollAnimations {
   constructor() {
     this.animatedElements = document.querySelectorAll('.animate-on-scroll');
+    this.lazyBgElements = document.querySelectorAll('.lazy-bg');
     this.observerOptions = {
       threshold: 0.05,
       rootMargin: '0px 0px -20px 0px'
@@ -387,16 +446,35 @@ class ScrollAnimations {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
-          console.log('Animation triggered for:', entry.target.className);
+
           // Unobserve after animation to improve performance
           this.observer.unobserve(entry.target);
         }
       });
     }, this.observerOptions);
 
+    // Create intersection observer for lazy loading background images
+    this.lazyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bgUrl = entry.target.dataset.bg;
+          if (bgUrl) {
+            entry.target.style.backgroundImage = `url('${bgUrl}')`;
+            entry.target.classList.remove('lazy-bg');
+            this.lazyObserver.unobserve(entry.target);
+          }
+        }
+      });
+    }, { rootMargin: '50px' });
+
     // Observe all animated elements
     this.animatedElements.forEach(element => {
       this.observer.observe(element);
+    });
+
+    // Observe all lazy background elements
+    this.lazyBgElements.forEach(element => {
+      this.lazyObserver.observe(element);
     });
 
     // Add animate-on-scroll class to elements that should animate
@@ -409,7 +487,7 @@ class ScrollAnimations {
         const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
         if (isVisible && !element.classList.contains('in-view')) {
           element.classList.add('in-view');
-          console.log('Immediate visibility triggered for:', element.className);
+
         }
       });
     }, 100);
@@ -420,7 +498,7 @@ class ScrollAnimations {
       skillsCategories.forEach(category => {
         if (!category.classList.contains('in-view')) {
           category.classList.add('in-view');
-          console.log('Fallback animation triggered for skills category');
+
         }
       });
     }, 2000);
@@ -673,7 +751,7 @@ class PerformanceOptimizer {
     // Basic performance logging
     window.addEventListener('load', () => {
       const perfData = performance.getEntriesByType('navigation')[0];
-      console.log('Page Load Time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+      // Performance monitoring can be enabled for development
     });
   }
 }
@@ -813,7 +891,7 @@ class PortfolioApp {
       // Add loaded class to body for CSS animations
       document.body.classList.add('loaded');
 
-      console.log('Portfolio app initialized successfully');
+
 
     } catch (error) {
       console.error('Error initializing portfolio app:', error);
@@ -844,7 +922,7 @@ window.portfolioApp = portfolioApp;
 // Additional global event listeners
 window.addEventListener('resize', debounce(() => {
   // Handle resize events
-  console.log('Window resized');
+  // Handle responsive adjustments
 }, 250));
 
 window.addEventListener('orientationchange', () => {
@@ -859,10 +937,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(registration => {
-        console.log('SW registered: ', registration);
+        // Service worker registered successfully
       })
       .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
+        // Service worker registration failed
       });
   });
 }
