@@ -375,8 +375,8 @@ class ScrollAnimations {
   constructor() {
     this.animatedElements = document.querySelectorAll('.animate-on-scroll');
     this.observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: 0.05,
+      rootMargin: '0px 0px -20px 0px'
     };
     this.init();
   }
@@ -387,6 +387,7 @@ class ScrollAnimations {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
+          console.log('Animation triggered for:', entry.target.className);
           // Unobserve after animation to improve performance
           this.observer.unobserve(entry.target);
         }
@@ -400,16 +401,36 @@ class ScrollAnimations {
 
     // Add animate-on-scroll class to elements that should animate
     this.addAnimationClasses();
+
+    // Immediate check: Show elements already in viewport
+    setTimeout(() => {
+      this.animatedElements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isVisible && !element.classList.contains('in-view')) {
+          element.classList.add('in-view');
+          console.log('Immediate visibility triggered for:', element.className);
+        }
+      });
+    }, 100);
+
+    // Fallback: Ensure skills are visible after 2 seconds if animation fails
+    setTimeout(() => {
+      const skillsCategories = document.querySelectorAll('.skills__category');
+      skillsCategories.forEach(category => {
+        if (!category.classList.contains('in-view')) {
+          category.classList.add('in-view');
+          console.log('Fallback animation triggered for skills category');
+        }
+      });
+    }, 2000);
   }
 
   addAnimationClasses() {
-    // Add animation classes to various elements
+    // Add animation classes to elements that don't already have them
     const elementsToAnimate = [
-      '.skills__card',
-      '.projects__card',
-      '.hero__content > *',
-      'section > h2',
-      'section > p'
+      'section > h2:not(.animate-on-scroll)',
+      'section > p:not(.animate-on-scroll)'
     ];
 
     elementsToAnimate.forEach(selector => {
@@ -766,6 +787,9 @@ class PortfolioApp {
 
   initializeComponents() {
     try {
+      // Add js-enabled class to enable JavaScript-dependent animations
+      document.body.classList.add('js-enabled');
+
       // Initialize all components
       this.components.smoothScrolling = new SmoothScrolling();
       this.components.mobileMenu = new MobileMenu();
